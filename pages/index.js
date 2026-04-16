@@ -4,8 +4,10 @@ import Head from 'next/head';
 export default function Dashboard() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
-  const [config, setConfig] = useState({ enabled: false, toggle_key: '118', delay_ms: 0 });
+  const [config, setConfig] = useState({ enabled: false, toggle_key: '118', delay_ms: 0, play_sound: false });
   const [logs, setLogs] = useState([]);
+  const [connectedSince, setConnectedSince] = useState(null);
+  const [activeTimer, setActiveTimer] = useState('00:00:00');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -23,9 +25,38 @@ export default function Dashboard() {
       if (res.ok) {
         const data = await res.json();
         setLogs(data);
+
+        // Find connection status
+        let startTs = null;
+        for (let l of data) {
+          if (l.msg.includes('Emulator Closed')) {
+            startTs = null;
+            break;
+          }
+          if (l.msg.includes('Emulator Started')) {
+            startTs = l.timestamp || null;
+            break;
+          }
+        }
+        setConnectedSince(startTs);
       }
     } catch(e) {}
   };
+
+  useEffect(() => {
+    if (!connectedSince) {
+      setActiveTimer('00:00:00');
+      return;
+    }
+    const timerInv = setInterval(() => {
+      const diff = Math.floor((Date.now() - connectedSince) / 1000);
+      const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+      const s = String(diff % 60).padStart(2, '0');
+      setActiveTimer(`${h}:${m}:${s}`);
+    }, 1000);
+    return () => clearInterval(timerInv);
+  }, [connectedSince]);
 
   const fetchConfig = async () => {
     try {
@@ -119,13 +150,37 @@ export default function Dashboard() {
   return (
     <div style={styles.container}>
       <Head><title>RageLock Admin</title></Head>
-      <div style={styles.topbar}>
-        <h2 style={styles.title}>RAGE LOCK <span style={styles.accent}>v5</span></h2>
-        <button onClick={handleLogout} style={styles.logoutBtn}>Logout</button>
-      </div>
-
       <div style={styles.main}>
-        {/* Toggle Card */}
+        <div style={styles.headerRow}>
+          <h1 style={styles.title}>RAGE LOCK <span style={styles.version}>v7</span></h1>
+          <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+        </div>
+
+        {/* Realtime Emulator Connection Banner */}
+        <div style={{
+          ...styles.card, 
+          padding: '1rem', 
+          backgroundColor: connectedSince ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+          border: `1px solid ${connectedSince ? '#10b981' : '#ef4444'}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}>
+          <div>
+            <h3 style={{...styles.cardTitle, margin: 0, color: connectedSince ? '#10b981' : '#ef4444'}}>
+              {connectedSince ? '🟢 EMULATOR CONNECTED' : '🔴 EMULATOR DISCONNECTED'}
+            </h3>
+            <p style={{...styles.subText, margin: '4px 0 0 0'}}>
+              {connectedSince ? 'Hack is securely attached to the game.' : 'Waiting for game to run...'}
+            </p>
+          </div>
+          {connectedSince && (
+            <div style={{textAlign: 'right'}}>
+              <p style={{...styles.subText, margin: 0, fontSize: '0.75rem'}}>UPTIME</p>
+              <h2 style={{margin: 0, color: '#f8fafc', letterSpacing: '2px', fontFamily: 'monospace'}}>{activeTimer}</h2>
+            </div>
+          )}
+        </div>
+
+        {/* Global Control Card */}
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Global Hack Status</h3>
           <p style={styles.subText}>Toggle this to instantly enable or disable the hack in all clients.</p>
@@ -202,6 +257,19 @@ export default function Dashboard() {
             />
           </div>
 
+          <div style={styles.field}>
+            <label style={{...styles.label, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
+              <input 
+                type="checkbox" 
+                checked={config.play_sound} 
+                onChange={e => setConfig({...config, play_sound: e.target.checked})} 
+                style={{ width: '18px', height: '18px' }}
+              />
+              ENABLE IN-GAME BEEPS (SOUND)
+            </label>
+            <p style={{...styles.subText, margin: 0, fontSize: '0.8rem'}}>If disabled, the hack will turn on/off silently without Beeps.</p>
+          </div>
+
           <div style={styles.actionBar}>
             <button 
               onClick={() => saveConfig(config)} 
@@ -212,6 +280,7 @@ export default function Dashboard() {
             </button>
             {lastUpdated && <span style={styles.savedNotice}>Last saved: {lastUpdated}</span>}
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -276,6 +345,14 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'background-color 0.2s',
+  },
+  headerRow: {
+    width: '100%',
+    maxWidth: '500px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '2rem'
   },
   topbar: {
     width: '100%',

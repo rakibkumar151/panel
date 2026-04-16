@@ -18,6 +18,7 @@ export default async function handler(req, res) {
       enabled: false,
       toggle_key: '118', // 118 = VK_F7 by default
       delay_ms: 0,
+      play_sound: false,
     };
 
     res.setHeader('Cache-Control', 'no-store, no-cache');
@@ -28,6 +29,7 @@ export default async function handler(req, res) {
       pattern: process.env.HACK_PATTERN || '',
       toggle_key: config.toggle_key || '118',
       delay_ms: parseInt(config.delay_ms) || 0,
+      play_sound: !!config.play_sound,
     });
   } catch (e) {
     res.status(500).json({ error: 'KV error' });

@@ -16,6 +16,7 @@ export default async function handler(req, res) {
       enabled: false,
       toggle_key: '118',
       delay_ms: 0,
+      play_sound: false,
     };
     res.json(config);
   } catch (e) {

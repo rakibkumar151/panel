@@ -15,6 +15,7 @@ export default async function handler(req, res) {
 
     const logEntry = JSON.stringify({
       time: new Date().toLocaleTimeString(),
+      timestamp: Date.now(),
       msg: message,
     });
 
