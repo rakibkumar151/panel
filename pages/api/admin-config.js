@@ -17,6 +17,7 @@ export default async function handler(req, res) {
       read_off: '',
       write_off: '',
       pattern: '',
+      toggle_key: '118',
     };
     res.json(config);
   } catch (e) {

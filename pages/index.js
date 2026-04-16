@@ -4,7 +4,7 @@ import Head from 'next/head';
 export default function Dashboard() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
-  const [config, setConfig] = useState({ enabled: false, read_off: '', write_off: '', pattern: '' });
+  const [config, setConfig] = useState({ enabled: false, read_off: '', write_off: '', pattern: '', toggle_key: '118' });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -158,6 +158,32 @@ export default function Dashboard() {
               style={styles.input} 
               placeholder="e.g. 55 8B EC 83 EC"
             />
+          </div>
+
+          <div style={styles.field}>
+            <label style={styles.label}>TOGGLE KEY</label>
+            <select 
+              value={config.toggle_key} 
+              onChange={e => setConfig({...config, toggle_key: e.target.value})} 
+              style={styles.input}
+            >
+              <option value="112">F1</option>
+              <option value="113">F2</option>
+              <option value="114">F3</option>
+              <option value="115">F4</option>
+              <option value="116">F5</option>
+              <option value="117">F6</option>
+              <option value="118">F7 (Default)</option>
+              <option value="119">F8</option>
+              <option value="120">F9</option>
+              <option value="121">F10</option>
+              <option value="122">F11</option>
+              <option value="123">F12</option>
+              <option value="45">Insert</option>
+              <option value="46">Delete</option>
+              <option value="36">Home</option>
+              <option value="35">End</option>
+            </select>
           </div>
 
           <div style={styles.actionBar}>

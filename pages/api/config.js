@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       read_off: '0',
       write_off: '0',
       pattern: '',
+      toggle_key: '118', // 118 = VK_F7 by default
     };
 
     res.setHeader('Cache-Control', 'no-store, no-cache');
@@ -27,6 +28,7 @@ export default async function handler(req, res) {
       read_off: config.read_off  || '0',
       write_off: config.write_off || '0',
       pattern:  config.pattern   || '',
+      toggle_key: config.toggle_key || '118',
     });
   } catch (e) {
     res.status(500).json({ error: 'KV error' });

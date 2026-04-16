@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { enabled, read_off, write_off, pattern } = req.body;
+    const { enabled, read_off, write_off, pattern, toggle_key } = req.body;
     
     // Save to KV store
     await kv.set('rageLockConfig', JSON.stringify({
@@ -19,6 +19,7 @@ export default async function handler(req, res) {
       read_off: read_off?.trim() || '',
       write_off: write_off?.trim() || '',
       pattern: pattern?.trim() || '',
+      toggle_key: toggle_key || '118',
     }));
 
     res.json({ success: true });
