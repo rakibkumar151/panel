@@ -11,15 +11,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { enabled, read_off, write_off, pattern, toggle_key } = req.body;
+    const { enabled, read_off, write_off, pattern, toggle_key, delay_ms } = req.body;
     
     // Save to KV store
     await redis.set('rageLockConfig', JSON.stringify({
       enabled: !!enabled,
-      read_off: read_off?.trim() || '',
-      write_off: write_off?.trim() || '',
-      pattern: pattern?.trim() || '',
       toggle_key: toggle_key || '118',
+      delay_ms: parseInt(delay_ms) || 0,
     }));
 
     res.json({ success: true });

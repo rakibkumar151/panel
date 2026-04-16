@@ -14,10 +14,8 @@ export default async function handler(req, res) {
     const raw = await redis.get('rageLockConfig');
     const config = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {
       enabled: false,
-      read_off: '',
-      write_off: '',
-      pattern: '',
       toggle_key: '118',
+      delay_ms: 0,
     };
     res.json(config);
   } catch (e) {

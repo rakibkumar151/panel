@@ -4,7 +4,8 @@ import Head from 'next/head';
 export default function Dashboard() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
-  const [config, setConfig] = useState({ enabled: false, read_off: '', write_off: '', pattern: '', toggle_key: '118' });
+  const [config, setConfig] = useState({ enabled: false, toggle_key: '118', delay_ms: 0 });
+  const [logs, setLogs] = useState([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -12,7 +13,19 @@ export default function Dashboard() {
   // Check login state and load config
   useEffect(() => {
     fetchConfig();
+    const inv = setInterval(fetchLogs, 3000);
+    return () => clearInterval(inv);
   }, []);
+
+  const fetchLogs = async () => {
+    try {
+      const res = await fetch('/api/status');
+      if (res.ok) {
+        const data = await res.json();
+        setLogs(data);
+      }
+    } catch(e) {}
+  };
 
   const fetchConfig = async () => {
     try {
@@ -126,44 +139,31 @@ export default function Dashboard() {
               }} />
             </div>
             <span style={{...styles.statusText, color: config.enabled ? '#10b981' : '#9ca3af'}}>
-              {config.enabled ? 'ACTIVE (F7 Allowed)' : 'DISABLED (F7 Blocked)'}
+              {config.enabled ? 'ACTIVE (Will run)' : 'DISABLED (Force stopped)'}
             </span>
+          </div>
+        </div>
+
+        {/* Live Logs Card */}
+        <div style={styles.card}>
+          <h3 style={styles.cardTitle}>Live Status Logs</h3>
+          <p style={styles.subText}>Real-time logs from the emulator.</p>
+          <div style={styles.logBox}>
+            {logs.length === 0 ? <p style={{color: '#64748b', fontStyle: 'italic'}}>Waiting for emulator logs...</p> : null}
+            {logs.map((log, i) => (
+              <div key={i} style={styles.logRow}>
+                <span style={styles.logTime}>[{log.time}]</span>
+                <span style={{color: log.msg.includes('Active')||log.msg.includes('ON') ? '#10b981' : (log.msg.includes('OFF')||log.msg.includes('Disabled') ? '#ef4444' : '#60a5fa') }}>
+                  {log.msg}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Config Card */}
         <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Memory Configuration</h3>
-          <p style={styles.subText}>Update memory offsets and scan pattern.</p>
-
-          <div style={styles.field}>
-            <label style={styles.label}>READ_OFF</label>
-            <input 
-              value={config.read_off} 
-              onChange={e => setConfig({...config, read_off: e.target.value})} 
-              style={styles.input} 
-            />
-          </div>
-
-          <div style={styles.field}>
-            <label style={styles.label}>WRITE_OFF</label>
-            <input 
-              value={config.write_off} 
-              onChange={e => setConfig({...config, write_off: e.target.value})} 
-              style={styles.input} 
-            />
-          </div>
-
-          <div style={styles.field}>
-            <label style={styles.label}>PATTERN</label>
-            <input 
-              value={config.pattern} 
-              onChange={e => setConfig({...config, pattern: e.target.value})} 
-              style={styles.input} 
-              placeholder="e.g. 55 8B EC 83 EC"
-            />
-          </div>
-
+          <h3 style={styles.cardTitle}>Activation Settings</h3>
           <div style={styles.field}>
             <label style={styles.label}>TOGGLE KEY</label>
             <select 
@@ -171,6 +171,7 @@ export default function Dashboard() {
               onChange={e => setConfig({...config, toggle_key: e.target.value})} 
               style={styles.input}
             >
+              <option value="0">None (Website Only)</option>
               <option value="112">F1</option>
               <option value="113">F2</option>
               <option value="114">F3</option>
@@ -188,6 +189,17 @@ export default function Dashboard() {
               <option value="36">Home</option>
               <option value="35">End</option>
             </select>
+          </div>
+
+          <div style={styles.field}>
+            <label style={styles.label}>AUTO-START DELAY (SECONDS)</label>
+            <input 
+              type="number"
+              value={config.delay_ms / 1000} 
+              onChange={e => setConfig({...config, delay_ms: Math.max(0, parseInt(e.target.value) * 1000)})} 
+              style={styles.input}
+              min="0"
+            />
           </div>
 
           <div style={styles.actionBar}>
@@ -307,5 +319,17 @@ const styles = {
   field: { display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' },
   label: { fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 'bold', letterSpacing: '0.5px' },
   actionBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' },
-  savedNotice: { color: '#10b981', fontSize: '0.85rem', fontStyle: 'italic' }
+  savedNotice: { color: '#10b981', fontSize: '0.85rem', fontStyle: 'italic' },
+  logBox: {
+    backgroundColor: '#0f172a',
+    borderRadius: '8px',
+    padding: '1rem',
+    height: '200px',
+    overflowY: 'auto',
+    border: '1px solid #334155',
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+  },
+  logRow: { marginBottom: '0.3rem' },
+  logTime: { color: '#94a3b8', marginRight: '0.5rem' }
 };

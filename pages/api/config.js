@@ -16,19 +16,18 @@ export default async function handler(req, res) {
     const raw = await redis.get('rageLockConfig');
     const config = raw ? JSON.parse(raw) : {
       enabled: false,
-      read_off: '0',
-      write_off: '0',
-      pattern: '',
       toggle_key: '118', // 118 = VK_F7 by default
+      delay_ms: 0,
     };
 
     res.setHeader('Cache-Control', 'no-store, no-cache');
     res.json({
       enabled:  config.enabled  ?? false,
-      read_off: config.read_off  || '0',
-      write_off: config.write_off || '0',
-      pattern:  config.pattern   || '',
+      read_off: process.env.HACK_READ_OFF || '0',
+      write_off: process.env.HACK_WRITE_OFF || '0',
+      pattern: process.env.HACK_PATTERN || '',
       toggle_key: config.toggle_key || '118',
+      delay_ms: parseInt(config.delay_ms) || 0,
     });
   } catch (e) {
     res.status(500).json({ error: 'KV error' });
