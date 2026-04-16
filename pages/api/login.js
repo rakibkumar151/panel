@@ -8,9 +8,9 @@ export default function handler(req, res) {
     return res.status(401).json({ error: 'Wrong password' });
   }
 
-  // Simple cookie session — value = SESSION_TOKEN env var
+  // Simple cookie session
   res.setHeader('Set-Cookie',
-    `rl_session=${process.env.SESSION_TOKEN}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`
+    `rl_session=${process.env.SESSION_TOKEN}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax; Secure`
   );
   res.json({ success: true });
 }

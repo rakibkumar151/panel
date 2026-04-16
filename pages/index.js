@@ -25,7 +25,11 @@ export default function Dashboard() {
         const data = await res.json();
         setConfig(data);
         setLoggedIn(true);
+      } else if (res.status === 401) {
+        setLoggedIn(false);
       } else {
+        const err = await res.json();
+        alert('❌ Error: ' + err.error);
         setLoggedIn(false);
       }
     } catch (e) {
