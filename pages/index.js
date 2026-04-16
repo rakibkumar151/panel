@@ -281,7 +281,6 @@ export default function Dashboard() {
             {lastUpdated && <span style={styles.savedNotice}>Last saved: {lastUpdated}</span>}
           </div>
         </div>
-        </div>
       </div>
     </div>
   );
