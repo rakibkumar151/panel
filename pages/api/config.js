@@ -1,7 +1,7 @@
 // DLL এই endpoint poll করে
 // GET /api/config?key=DLL_API_KEY
-// Response: { enabled, read_off, write_off, pattern }
-import { kv } from '@vercel/kv';
+// Response: { enabled, read_off, write_off, pattern, toggle_key }
+import redis from '../../lib/redis';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end();
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const raw = await kv.get('rageLockConfig');
+    const raw = await redis.get('rageLockConfig');
     const config = raw ? JSON.parse(raw) : {
       enabled: false,
       read_off: '0',

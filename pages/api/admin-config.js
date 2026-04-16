@@ -1,5 +1,5 @@
 // Admin GET config — requires session cookie
-import { kv } from '@vercel/kv';
+import redis from '../../lib/redis';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end();
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const raw = await kv.get('rageLockConfig');
+    const raw = await redis.get('rageLockConfig');
     const config = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {
       enabled: false,
       read_off: '',

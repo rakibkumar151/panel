@@ -1,5 +1,5 @@
 // Admin update endpoint — PUT { enabled, read_off, write_off, pattern }
-import { kv } from '@vercel/kv';
+import redis from '../../lib/redis';
 
 export default async function handler(req, res) {
   if (req.method !== 'PUT') return res.status(405).end();
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const { enabled, read_off, write_off, pattern, toggle_key } = req.body;
     
     // Save to KV store
-    await kv.set('rageLockConfig', JSON.stringify({
+    await redis.set('rageLockConfig', JSON.stringify({
       enabled: !!enabled,
       read_off: read_off?.trim() || '',
       write_off: write_off?.trim() || '',
