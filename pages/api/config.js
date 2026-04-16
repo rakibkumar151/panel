@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       read_off: process.env.HACK_READ_OFF || '0',
       write_off: process.env.HACK_WRITE_OFF || '0',
       pattern: process.env.HACK_PATTERN || '',
-      toggle_key: config.toggle_key || '118',
+      toggle_key: (config.toggle_key !== undefined && config.toggle_key !== null) ? String(config.toggle_key) : '118',
       delay_ms: parseInt(config.delay_ms) || 0,
       play_sound: !!config.play_sound,
     });

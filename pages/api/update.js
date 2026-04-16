@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     // Save to KV store
     await redis.set('rageLockConfig', JSON.stringify({
       enabled: !!enabled,
-      toggle_key: toggle_key || '118',
+      toggle_key: (toggle_key !== undefined && toggle_key !== null) ? String(toggle_key) : '118',
       delay_ms: parseInt(delay_ms) || 0,
       play_sound: !!play_sound,
     }));
